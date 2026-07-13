@@ -1,69 +1,53 @@
-﻿class Company<T>
+﻿class Person
 {
-    public T Ceo { get; private set; }
-    public Company(T ceo)
-    {
-        Ceo = ceo;
-    }
-
-    public void Print() { Console.WriteLine($"ceo: {Ceo}"); }
+    public string Name { get; private set; } = "Unknown";
+    public Person(string name) { Name = name; }
 }
 
-class Person<T, N>
+class Employee : Person
 {
-    public static T? globalHWID;
-    public T Id { get; private set; }
-    public N Name { get; private set; }
-    public Person(T id, N name)
-    {
-        Id = id;
-        Name = name;
-    }
-
-    public void Print() { Console.WriteLine($"id: {Id}, name: {Name}"); }
-    public static void Print(T value1, T value2)
-    {
-        T temp = value1;
-        value1 = value2;
-        value2 = temp;
-
-        Console.WriteLine($"value 1: {value1}");
-        Console.WriteLine($"value 2: {value2}");
+    public string Company { get; private set; } = "Unknown";
+    public Employee(string name, string company) : base(name)
+    {  
+        Company = company; 
     }
 }
 
 class Program
 {
-    static void ViewType<T>(T value)
+    public static void Main()
     {
-        Console.WriteLine(value?.GetType());
-    }
+        Person President1 = new Employee("Mister1", "Google");
+        var President2 = new Person("Mister2");
+        var Andrew = new Employee("Andrew", "Microsoft");
 
-    static void Main()
-    {
-        var Andrey = new Person<string, string>("316-microsoft-513", "Andrey");
-        Person<string, string>.globalHWID = "HWID-6136MMW";
-        Person<int, string>.globalHWID = 63197060;
-        var Company = new Company<Person<string, string>>(Andrey);
+        Console.WriteLine($"{President2.Name}\n");
+        Console.WriteLine($"{Andrew.Name}");
+        Console.WriteLine($"{Andrew.Company}");
 
-        Company.Ceo.Print();
-        Company.Print();
 
-        Console.WriteLine();
-
-        Console.WriteLine(Person<string, int>.globalHWID ?? "null enter");
-        Console.WriteLine(Person<int, string>.globalHWID);
+        Console.WriteLine(President1.Name);
+        Employee trueEmployee = (Employee)President1;
+        Console.WriteLine(trueEmployee.Company);
 
         Console.WriteLine();
 
-        Person<string, string>.Print("3", "5");
-        Person<int, string>.Print(1, 66);
-        Person<string, int>.Print("TEST", "TEST2");
+        try
+        {
+            Employee fakeEmployee = (Employee)President2;
+            Console.WriteLine(fakeEmployee.Name);
+            Console.WriteLine(fakeEmployee.Company); // error 
+        }
+        catch (InvalidCastException)
+        {
+            Console.WriteLine("null data");
+        }
+        finally
+        {
+            Console.WriteLine("You will see it anyway");
+        }
 
-        Console.WriteLine();
-
-        ViewType(Person<string, string>.globalHWID);
-        ViewType(Person<int, string>.globalHWID);
-        ViewType(Person<string, int>.globalHWID ?? "System.String :( ");
+        Person fakeBoss = Andrew;
+        Console.WriteLine(fakeBoss.Name);
     }
 }
