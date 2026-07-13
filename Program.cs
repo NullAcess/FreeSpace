@@ -1,53 +1,107 @@
-﻿class Person
+﻿class EmptyClass
 {
-    public string Name { get; private set; } = "Unknown";
-    public Person(string name) { Name = name; }
+
 }
 
-class Employee : Person
+class Person<T> where T : class
 {
-    public string Company { get; private set; } = "Unknown";
-    public Employee(string name, string company) : base(name)
-    {  
-        Company = company; 
+    public T Id;
+    public Person(T id) => Id = id;
+}
+class AdvancedPerson<T, P> : Person<T> where T : class
+{
+    public P Name { get; private set; }
+    public AdvancedPerson(T id, P name) : base(id) => Name = name;
+}
+
+class AdvancedPerson2 : Person<string>
+{
+    public Guid Code { get; private set; }
+    public AdvancedPerson2(Guid code, string id) : base(id) => Code = code;
+}
+
+
+class Message
+{
+    public string Text { get; private set; }
+    public Message(string text) => Text = text;
+}
+
+class EmailMessage : Message
+{
+    public EmailMessage(string text) : base(text) { }
+}
+class SmsMessage : Message
+{
+    public SmsMessage(string text) : base(text) { }
+}
+
+class DataManager<T, P>
+    where T : Message
+    where P : Person<string>
+{
+    private string _hello = "Hello World!";
+
+    public DataManager(string hello)
+    {
+        _hello = hello;
+    }
+
+    public static void SendMessage(P sender, T message)
+    {
+        Console.WriteLine($"Sender: {sender.Id}");
+        Console.WriteLine($"Message: {message.Text}");
+    }
+}
+
+//class BrowseDataMangaer<T, P> : DataManager<T, P>
+//{
+//    public BrowseDataMangaer(string helloWorldText) : base(helloWorldText) { }
+//}
+
+class EmptyDataManger<T> where T : new()
+{
+    public T? emptyObject { get; private set; }
+    public static void ViewEmptyObjects(T element)
+    {
+        Console.WriteLine($"Class name: '{element?.GetType()}' is empty");
     }
 }
 
 class Program
 {
-    public static void Main()
+    static void Main()
     {
-        Person President1 = new Employee("Mister1", "Google");
-        var President2 = new Person("Mister2");
-        var Andrew = new Employee("Andrew", "Microsoft");
+        Person<string> person = new Person<string>("Andrew");
+        Message message = new Message("ordinary message");
+        EmailMessage emailMessage = new EmailMessage("mail message");
+        SmsMessage smsMessage = new SmsMessage("SmsMessage");
 
-        Console.WriteLine($"{President2.Name}\n");
-        Console.WriteLine($"{Andrew.Name}");
-        Console.WriteLine($"{Andrew.Company}");
-
-
-        Console.WriteLine(President1.Name);
-        Employee trueEmployee = (Employee)President1;
-        Console.WriteLine(trueEmployee.Company);
+        DataManager<Message, Person<string>>.SendMessage(person, message);
+        Console.WriteLine();
+        DataManager<EmailMessage, Person<string>>.SendMessage(person, emailMessage);
+        Console.WriteLine();
+        DataManager<Message, Person<string>>.SendMessage(person, smsMessage);
 
         Console.WriteLine();
 
-        try
-        {
-            Employee fakeEmployee = (Employee)President2;
-            Console.WriteLine(fakeEmployee.Name);
-            Console.WriteLine(fakeEmployee.Company); // error 
-        }
-        catch (InvalidCastException)
-        {
-            Console.WriteLine("null data");
-        }
-        finally
-        {
-            Console.WriteLine("You will see it anyway");
-        }
+        EmptyClass empty = new EmptyClass();
+        EmptyDataManger<EmptyClass>.ViewEmptyObjects(empty);
+        //> EmptyDataManger<Message>.ViewEmptyObjects(message); ctor is not empty in Message class
 
-        Person fakeBoss = Andrew;
-        Console.WriteLine(fakeBoss.Name);
+        Person<string> person1 = new Person<string>("115-abc");
+        Person<string> personToAdvenced = new AdvancedPerson<string, int>("2424", 737373);
+        AdvancedPerson<string, int> personToAdvenced1 = (AdvancedPerson<string, int>)personToAdvenced;
+
+        Console.WriteLine(person1.Id);
+        Console.WriteLine(personToAdvenced.Id);
+        Console.WriteLine(personToAdvenced1.Id);
+        Console.WriteLine(personToAdvenced1.Name);
+
+        AdvancedPerson2 advPerson = new AdvancedPerson2(Guid.NewGuid(), "777");
+        Person<string> person2 = new AdvancedPerson2(Guid.NewGuid(), "5555");
+        Console.WriteLine(advPerson.Id);
+
+        //> person.Id = 36326; | error convert int to string
     }
 }
