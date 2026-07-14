@@ -1,98 +1,69 @@
-﻿using System.Diagnostics;
-
-class PersonClass
+﻿struct RoomDiameter
 {
-    public int Id { get; internal set; }
-    public string Name { get; internal set; }
-    public PersonClass(int id, string name)
+    public int X { get; }
+    public int Y { get; }
+    public int Z { get; }
+
+    public RoomDiameter(int x, int y, int z)
     {
-        Id = id;
-        Name = name;
+        X = x;
+        Y = y;
+        Z = z;
+    }
+
+    public void PrintDiametr()
+    {
+        Console.WriteLine($"x: {X}, y: {Y}, z: {Z}");
     }
 }
 
-struct PersonStruct
+class Room
 {
-    public int Id { get; internal set; }
-    public string Name { get; internal set; }
-    public PersonStruct(int id, string name)
+    public RoomDiameter roomDiameter;
+    public string Name { get; private set; }
+
+    public Room(string name, RoomDiameter roomDiameter)
     {
-        Id = id;
+        this.roomDiameter = roomDiameter;
         Name = name;
+    }
+
+    public void Print()
+    {
+        Console.WriteLine($"Name: {Name}");
+        roomDiameter.PrintDiametr();
+    }
+}
+
+class EmptyRoom : Room
+{
+    private const string _name = "EmptyRoom";
+
+    public EmptyRoom() : base(_name, new RoomDiameter())
+    {
+        
+    }
+}
+
+class BasicRoom : Room
+{
+    private const string _name = "BasicRoom";
+
+    public BasicRoom() : base(_name, new RoomDiameter(5, 5, 5))
+    {
+
     }
 }
 
 class Program
 {
-    //static void StructProp<T>(T structStack) where T : PersonStruct ( error )
-    //{
-    //    structStack.Id ( error )
-    //> where T принимает только классы или интферйсы ( error ) : (
-
-    static void StructProp(ref PersonStruct structStack)
-    {
-        Console.WriteLine("Struct");
-        structStack.Id = 1;
-        structStack.Name = "StructProp";
-    }
-
-    static void ClassProp<T>(T classRef) where T: PersonClass
-    {
-        Console.WriteLine("CLASS");
-        classRef.Id = 2;
-        classRef.Name = "ClassProp";
-    }
-
-    static void StructTest()
-    {
-        Console.WriteLine("STRUCT");
-        PersonStruct personStruct = new PersonStruct();
-        Console.WriteLine(personStruct.Id);
-        Console.WriteLine(personStruct.Name);
-    }
-
-    static void ClassTest()
-    {
-        Console.WriteLine("CLASS");
-        PersonClass person = new PersonClass(1, "Andrew"); // 0 and nothing : (
-        Console.WriteLine(person.Id);
-        Console.WriteLine(person.Name);
-    }
     static void Main()
     {
-        Stopwatch watchTest = Stopwatch.StartNew();
-        StructTest();
-        watchTest.Stop();
-        Console.WriteLine($"Время выполнения: {watchTest.ElapsedMilliseconds} мс");
-        Console.WriteLine($"Точное время (такты): {watchTest.ElapsedTicks}");
+        var emptyRoom = new EmptyRoom();
+        var basicRoom = new BasicRoom();
 
-        Stopwatch watch = Stopwatch.StartNew();
-        StructTest();
-        watch.Stop();
-        Console.WriteLine($"Время выполнения: {watch.ElapsedMilliseconds} мс");
-        Console.WriteLine($"Точное время (такты): {watch.ElapsedTicks}");
-
-        Thread.Sleep(500);
-
-        Stopwatch watch2 = Stopwatch.StartNew();
-        ClassTest();
-        watch2.Stop();
-        Console.WriteLine($"Время выполнения: {watch2.ElapsedMilliseconds} мс");
-        Console.WriteLine($"Точное время (такты): {watch2.ElapsedTicks}");
-
-        PersonStruct personStruct = new PersonStruct(); // default values
-        PersonClass person = new PersonClass(1, "Andrew"); // 0 and nothing : (
-
-        Stopwatch watch3 = Stopwatch.StartNew();
-        ClassProp(person);
-        watch3.Stop();
-        Console.WriteLine($"Время выполнения: {watch3.ElapsedMilliseconds} мс");
-        Console.WriteLine($"Точное время (такты): {watch3.ElapsedTicks}");
-
-        Stopwatch watch4 = Stopwatch.StartNew();
-        StructProp(ref personStruct);
-        watch4.Stop();
-        Console.WriteLine($"Время выполнения: {watch4.ElapsedMilliseconds} мс");
-        Console.WriteLine($"Точное время (такты): {watch4.ElapsedTicks}");
+        emptyRoom.Print();
+        Console.WriteLine();
+        basicRoom.Print();
     }
 }
