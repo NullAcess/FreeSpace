@@ -1,69 +1,87 @@
-﻿struct RoomDiameter
+﻿class CompanyException : Exception
 {
-    public int X { get; }
-    public int Y { get; }
-    public int Z { get; }
-
-    public RoomDiameter(int x, int y, int z)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-    }
-
-    public void PrintDiametr()
-    {
-        Console.WriteLine($"x: {X}, y: {Y}, z: {Z}");
-    }
+    public string ExcMessageClass { get; private set; }
+    public CompanyException(string message, string excMessageClass) : base(message) { ExcMessageClass = excMessageClass;  }
 }
 
-class Room
+class Company
 {
-    public RoomDiameter roomDiameter;
-    public string Name { get; private set; }
+    private string id;
 
-    public Room(string name, RoomDiameter roomDiameter)
+    public string Id
     {
-        this.roomDiameter = roomDiameter;
-        Name = name;
+        get { return id; }
+        set
+        {
+            if (value[0] == 'r') throw new CompanyException("First letter of id is 'r'", "awggwa :foo");
+            else id = value;
+        }
     }
 
-    public void Print()
-    {
-        Console.WriteLine($"Name: {Name}");
-        roomDiameter.PrintDiametr();
-    }
-}
-
-class EmptyRoom : Room
-{
-    private const string _name = "EmptyRoom";
-
-    public EmptyRoom() : base(_name, new RoomDiameter())
-    {
-        
-    }
-}
-
-class BasicRoom : Room
-{
-    private const string _name = "BasicRoom";
-
-    public BasicRoom() : base(_name, new RoomDiameter(5, 5, 5))
-    {
-
-    }
+    public Company(string id) => Id = id;
 }
 
 class Program
 {
     static void Main()
     {
-        var emptyRoom = new EmptyRoom();
-        var basicRoom = new BasicRoom();
+        int[] numbers = new int[4];
+        int x = 120;
 
-        emptyRoom.Print();
-        Console.WriteLine();
-        basicRoom.Print();
+        try
+        {
+            try
+            {
+                var oneC = new Company("r-1367f631");
+
+                Console.Write("Enter your username: ");
+                string userEnter = Console.ReadLine() ?? String.Empty;
+                if (userEnter == null || userEnter.Length <= 2)
+                {
+                    throw new InvalidCastException("Invalid cast hehehaahh :) ");
+                }
+            }
+            catch (InvalidCastException exc)
+            {
+                Console.WriteLine(exc.Message);
+                Console.WriteLine(exc.StackTrace);
+                throw;
+            }
+            catch (CompanyException exceptionCustom)
+            {
+                Console.Clear();
+                Console.WriteLine("Exception, maybe this exception about invalid company ID");
+                Console.WriteLine($"Foo message: {exceptionCustom.ExcMessageClass}");
+            }
+        }
+        catch (InvalidCastException exc)
+        {
+            Console.WriteLine(exc.Message);
+            Console.WriteLine("EXCEPTION NUMBER twooooo!!!");
+        }
+        finally
+        {
+            Console.WriteLine($"\n!! Don't worry !!");
+        }
+
+        //try
+        //{
+        //    int y = x / 0;
+
+        //    Console.WriteLine($"Результат: {y}");
+        //    numbers[33] = 99;
+        //}
+        //catch (DivideByZeroException)
+        //{
+        //    Console.WriteLine("Возникло исключение DivideByZeroException");
+        //}
+        //catch (IndexOutOfRangeException ex)
+        //{
+        //    Console.WriteLine(ex.Message);
+        //}
+        //catch (Exception)
+        //{
+        //    Console.WriteLine("Exception"); // в конце, потому что catch будет использоваться первый подходящий
+        //}
     }
 }
