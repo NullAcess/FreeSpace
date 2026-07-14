@@ -1,107 +1,98 @@
-﻿class EmptyClass
-{
+﻿using System.Diagnostics;
 
-}
-
-class Person<T> where T : class
+class PersonClass
 {
-    public T Id;
-    public Person(T id) => Id = id;
-}
-class AdvancedPerson<T, P> : Person<T> where T : class
-{
-    public P Name { get; private set; }
-    public AdvancedPerson(T id, P name) : base(id) => Name = name;
-}
-
-class AdvancedPerson2 : Person<string>
-{
-    public Guid Code { get; private set; }
-    public AdvancedPerson2(Guid code, string id) : base(id) => Code = code;
-}
-
-
-class Message
-{
-    public string Text { get; private set; }
-    public Message(string text) => Text = text;
-}
-
-class EmailMessage : Message
-{
-    public EmailMessage(string text) : base(text) { }
-}
-class SmsMessage : Message
-{
-    public SmsMessage(string text) : base(text) { }
-}
-
-class DataManager<T, P>
-    where T : Message
-    where P : Person<string>
-{
-    private string _hello = "Hello World!";
-
-    public DataManager(string hello)
+    public int Id { get; internal set; }
+    public string Name { get; internal set; }
+    public PersonClass(int id, string name)
     {
-        _hello = hello;
-    }
-
-    public static void SendMessage(P sender, T message)
-    {
-        Console.WriteLine($"Sender: {sender.Id}");
-        Console.WriteLine($"Message: {message.Text}");
+        Id = id;
+        Name = name;
     }
 }
 
-//class BrowseDataMangaer<T, P> : DataManager<T, P>
-//{
-//    public BrowseDataMangaer(string helloWorldText) : base(helloWorldText) { }
-//}
-
-class EmptyDataManger<T> where T : new()
+struct PersonStruct
 {
-    public T? emptyObject { get; private set; }
-    public static void ViewEmptyObjects(T element)
+    public int Id { get; internal set; }
+    public string Name { get; internal set; }
+    public PersonStruct(int id, string name)
     {
-        Console.WriteLine($"Class name: '{element?.GetType()}' is empty");
+        Id = id;
+        Name = name;
     }
 }
 
 class Program
 {
+    //static void StructProp<T>(T structStack) where T : PersonStruct ( error )
+    //{
+    //    structStack.Id ( error )
+    //> where T принимает только классы или интферйсы ( error ) : (
+
+    static void StructProp(ref PersonStruct structStack)
+    {
+        Console.WriteLine("Struct");
+        structStack.Id = 1;
+        structStack.Name = "StructProp";
+    }
+
+    static void ClassProp<T>(T classRef) where T: PersonClass
+    {
+        Console.WriteLine("CLASS");
+        classRef.Id = 2;
+        classRef.Name = "ClassProp";
+    }
+
+    static void StructTest()
+    {
+        Console.WriteLine("STRUCT");
+        PersonStruct personStruct = new PersonStruct();
+        Console.WriteLine(personStruct.Id);
+        Console.WriteLine(personStruct.Name);
+    }
+
+    static void ClassTest()
+    {
+        Console.WriteLine("CLASS");
+        PersonClass person = new PersonClass(1, "Andrew"); // 0 and nothing : (
+        Console.WriteLine(person.Id);
+        Console.WriteLine(person.Name);
+    }
     static void Main()
     {
-        Person<string> person = new Person<string>("Andrew");
-        Message message = new Message("ordinary message");
-        EmailMessage emailMessage = new EmailMessage("mail message");
-        SmsMessage smsMessage = new SmsMessage("SmsMessage");
+        Stopwatch watchTest = Stopwatch.StartNew();
+        StructTest();
+        watchTest.Stop();
+        Console.WriteLine($"Время выполнения: {watchTest.ElapsedMilliseconds} мс");
+        Console.WriteLine($"Точное время (такты): {watchTest.ElapsedTicks}");
 
-        DataManager<Message, Person<string>>.SendMessage(person, message);
-        Console.WriteLine();
-        DataManager<EmailMessage, Person<string>>.SendMessage(person, emailMessage);
-        Console.WriteLine();
-        DataManager<Message, Person<string>>.SendMessage(person, smsMessage);
+        Stopwatch watch = Stopwatch.StartNew();
+        StructTest();
+        watch.Stop();
+        Console.WriteLine($"Время выполнения: {watch.ElapsedMilliseconds} мс");
+        Console.WriteLine($"Точное время (такты): {watch.ElapsedTicks}");
 
-        Console.WriteLine();
+        Thread.Sleep(500);
 
-        EmptyClass empty = new EmptyClass();
-        EmptyDataManger<EmptyClass>.ViewEmptyObjects(empty);
-        //> EmptyDataManger<Message>.ViewEmptyObjects(message); ctor is not empty in Message class
+        Stopwatch watch2 = Stopwatch.StartNew();
+        ClassTest();
+        watch2.Stop();
+        Console.WriteLine($"Время выполнения: {watch2.ElapsedMilliseconds} мс");
+        Console.WriteLine($"Точное время (такты): {watch2.ElapsedTicks}");
 
-        Person<string> person1 = new Person<string>("115-abc");
-        Person<string> personToAdvenced = new AdvancedPerson<string, int>("2424", 737373);
-        AdvancedPerson<string, int> personToAdvenced1 = (AdvancedPerson<string, int>)personToAdvenced;
+        PersonStruct personStruct = new PersonStruct(); // default values
+        PersonClass person = new PersonClass(1, "Andrew"); // 0 and nothing : (
 
-        Console.WriteLine(person1.Id);
-        Console.WriteLine(personToAdvenced.Id);
-        Console.WriteLine(personToAdvenced1.Id);
-        Console.WriteLine(personToAdvenced1.Name);
+        Stopwatch watch3 = Stopwatch.StartNew();
+        ClassProp(person);
+        watch3.Stop();
+        Console.WriteLine($"Время выполнения: {watch3.ElapsedMilliseconds} мс");
+        Console.WriteLine($"Точное время (такты): {watch3.ElapsedTicks}");
 
-        AdvancedPerson2 advPerson = new AdvancedPerson2(Guid.NewGuid(), "777");
-        Person<string> person2 = new AdvancedPerson2(Guid.NewGuid(), "5555");
-        Console.WriteLine(advPerson.Id);
-
-        //> person.Id = 36326; | error convert int to string
+        Stopwatch watch4 = Stopwatch.StartNew();
+        StructProp(ref personStruct);
+        watch4.Stop();
+        Console.WriteLine($"Время выполнения: {watch4.ElapsedMilliseconds} мс");
+        Console.WriteLine($"Точное время (такты): {watch4.ElapsedTicks}");
     }
 }
