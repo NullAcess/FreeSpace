@@ -1,85 +1,60 @@
-﻿using static Company;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Numerics;
 
-static class Methods
+delegate K Sum<T, K>(T x, T y) where T : INumber<T>;
+delegate Auth Auth();
+
+class Authorization
 {
-    public delegate void GenericDelegate<T>(T value);
-
-    public static void OrdinaryMethod(double value)
+    public static Auth AuthWelcome()
     {
-        Console.WriteLine(value);
+        Console.WriteLine("Dear user");
+        return AuthBye;
     }
-    public static void GenericMethod<T>(T value)
+
+    public static Auth AuthBye()
     {
-        Console.WriteLine(value);
+        Console.WriteLine("Dear user");
+        return null;
     }
 }
 
-static class Company
+class Operation
 {
-    public delegate Test Test();
-    public delegate string CompanyDelegate();
-
-
-    private static Test test = TestMethod();
-    public static Test TestMethod()
+    public static void DoPrint(Sum<double, bool> sum)
     {
-        test = GetOperation();
-        return test;
+        Console.WriteLine(sum(5,4));
     }
 
-    public static Test GetOperation()
+    public static bool SumBoolPrint<T>(T x, T y) where T : INumber<T>
     {
-        return test;
-        //return Google;
+        if (x + y > x) return true;
+        return false;
     }
 
-    public static string DoOperation(CompanyDelegate companyDelegate)
+    public static bool GetSubstractBoolPrint<T>(T x, T y) where T : INumber<T>
     {
-        return companyDelegate();
-    }
-
-    public static string Microsoft()
-    {
-        string name = "Microsfot";
-        return name;
-    }
-
-    public static string Google()
-    {
-        string name = "Google";
-        return name;
-    }
-
-    public static string Amazon()
-    {
-        string name = "Amazon";
-        return name;
+        if (x - y > x) return true;
+        return false;
     }
 }
 
 class Program
 {
+    static Sum<double, bool> OperationChoose(string choice)
+    {
+        switch (choice)
+        {
+            case "sum": return Operation.SumBoolPrint;
+            case "substract": return Operation.GetSubstractBoolPrint;
+            default: return Operation.SumBoolPrint;
+        }
+    }
 
     static void Main()
     {
-        Methods.GenericDelegate<double> genericDelegate = Methods.OrdinaryMethod;
-        genericDelegate += Methods.GenericMethod;
-
-        genericDelegate(5.4321);
-        // Console.WriteLine(genericDelegate(5.6136)); to works it you should set return type in your delegate ( Bad: delegate void GenericDelegate<T>(T value); )
-        //                                                                                                     ( Good delegate T GenericDelegate<T>(T value);    )
-
-        string company = String.Empty;
-
-        company = Company.DoOperation(Company.Amazon);
-        company = Company.DoOperation(Company.Google);
-        company = Company.DoOperation(Company.Microsoft);
-
-        Console.WriteLine(company);
-        Console.WriteLine();
-        //CompanyDelegate companyDelegate = Company.GetOperation();
-
-        Console.WriteLine();
-        Company.TestMethod();
+        Sum<double, bool> sum = OperationChoose("substract");
+        Operation.DoPrint(sum);
     }
 }
