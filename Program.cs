@@ -1,60 +1,36 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.Numerics;
+﻿delegate int GameHandler(Game game, int resist);
 
-delegate K Sum<T, K>(T x, T y) where T : INumber<T>;
-delegate Auth Auth();
-
-class Authorization
+class Game
 {
-    public static Auth AuthWelcome()
+    private GameHandler gameHandler;
+    public int Damage { get; set; }
+    public Game(int damage)
     {
-        Console.WriteLine("Dear user");
-        return AuthBye;
+        Damage = damage;
+    }
+    public void RegisterHandler(GameHandler gameHandler)
+    {
+        this.gameHandler = gameHandler;
     }
 
-    public static Auth AuthBye()
+    public void DoDamage()
     {
-        Console.WriteLine("Dear user");
-        return null;
+        int result = gameHandler?.Invoke(this, 10) ?? -1;
+        Console.WriteLine($"Final damage: {result}");
     }
 }
-
-class Operation
-{
-    public static void DoPrint(Sum<double, bool> sum)
-    {
-        Console.WriteLine(sum(5,4));
-    }
-
-    public static bool SumBoolPrint<T>(T x, T y) where T : INumber<T>
-    {
-        if (x + y > x) return true;
-        return false;
-    }
-
-    public static bool GetSubstractBoolPrint<T>(T x, T y) where T : INumber<T>
-    {
-        if (x - y > x) return true;
-        return false;
-    }
-}
-
 class Program
 {
-    static Sum<double, bool> OperationChoose(string choice)
+    public static int DamageResist(Game game, int resist)
     {
-        switch (choice)
-        {
-            case "sum": return Operation.SumBoolPrint;
-            case "substract": return Operation.GetSubstractBoolPrint;
-            default: return Operation.SumBoolPrint;
-        }
+        int result = game.Damage -= resist;
+        return result;
     }
 
     static void Main()
     {
-        Sum<double, bool> sum = OperationChoose("substract");
-        Operation.DoPrint(sum);
+        var game = new Game(45);
+        game.RegisterHandler(DamageResist);
+        game.DoDamage();
     }
 }
