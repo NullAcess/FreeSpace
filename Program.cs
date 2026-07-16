@@ -2,11 +2,14 @@
 
 class Game
 {
-    private GameHandler gameHandler;
+    private GameHandler gameHandler = delegate
+    {
+        return 50;
+    };
     public int Damage { get; set; }
     public Game(int damage)
     {
-        Damage = damage;
+        Damage = gameHandler(this, 10);
     }
     public void RegisterHandler(GameHandler gameHandler)
     {
