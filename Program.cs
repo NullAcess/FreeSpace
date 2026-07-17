@@ -20,7 +20,7 @@ class DataEngine
     {
         for (int i = 0; i < productsList.Count; i++)
         {
-            if (productFilter.Invoke(productsList[i]) == true) passProductsList.Add(productsList[i]);
+            if (productFilter.Invoke(productsList[i])) passProductsList.Add(productsList[i]);
         }
 
         return passProductsList;
@@ -37,16 +37,11 @@ class Program
         var fish = new Product("Fish", 200, ProductCategory.Helthy);
 
         products.Add(orange); products.Add(fish);
-
+            
         int priceCheck = 100; // ВВОД ПОЛЬЗОВАТЕЛЯ БУДЕТ ДОПУСТИМ
         ProductCategory productCategory = ProductCategory.Fruits; // ВВОД ПОЛЬЗОВАТЕЛЯ БУДЕТ ДОПУСТИМ
 
-        DataEngine.Filter(products, passProducts, 
-            product =>
-                {
-                    if (product.Price <= priceCheck && product.Category == productCategory) return true;
-                    return false;
-                });
+        DataEngine.Filter(products, passProducts, product => product.Price > priceCheck && product.Category == productCategory);
 
         for (int i = 0; i < passProducts.Count; i++)
         {
