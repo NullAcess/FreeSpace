@@ -1,39 +1,63 @@
-﻿delegate int GameHandler(Game game, int resist);
+﻿delegate bool ProductFilter(Product product);
 
-class Game
+class Product
 {
-    private GameHandler gameHandler = delegate
-    {
-        return 50;
-    };
-    public int Damage { get; set; }
-    public Game(int damage)
-    {
-        Damage = gameHandler(this, 10);
-    }
-    public void RegisterHandler(GameHandler gameHandler)
-    {
-        this.gameHandler = gameHandler;
-    }
+    public string Name { get; private set; }
+    public decimal Price { get; private set; }
+    public ProductCategory Category { get; private set; }
 
-    public void DoDamage()
+    public Product(string name, decimal price, ProductCategory category)
     {
-        int result = gameHandler?.Invoke(this, 10) ?? -1;
-        Console.WriteLine($"Final damage: {result}");
+        Name = name;
+        Price = price;
+        Category = category;
     }
 }
+
+class DataEngine
+{
+    public static List<Product> Filter(List<Product> productsList, List<Product> passProductsList, ProductFilter productFilter)
+    {
+        for (int i = 0; i < productsList.Count; i++)
+        {
+            if (productFilter.Invoke(productsList[i]) == true) passProductsList.Add(productsList[i]);
+        }
+
+        return passProductsList;
+    }
+}
+
 class Program
 {
-    public static int DamageResist(Game game, int resist)
-    {
-        int result = game.Damage -= resist;
-        return result;
-    }
-
     static void Main()
     {
-        var game = new Game(45);
-        game.RegisterHandler(DamageResist);
-        game.DoDamage();
+        List<Product> products = new List<Product>();
+        List<Product> passProducts = new List<Product>();
+        var orange = new Product("Orange", 100, ProductCategory.Fruits);
+        var fish = new Product("Fish", 200, ProductCategory.Helthy);
+
+        products.Add(orange); products.Add(fish);
+
+        int priceCheck = 100; // ВВОД ПОЛЬЗОВАТЕЛЯ БУДЕТ ДОПУСТИМ
+        ProductCategory productCategory = ProductCategory.Fruits; // ВВОД ПОЛЬЗОВАТЕЛЯ БУДЕТ ДОПУСТИМ
+
+        DataEngine.Filter(products, passProducts, 
+            product =>
+                {
+                    if (product.Price <= priceCheck && product.Category == productCategory) return true;
+                    return false;
+                });
+
+        for (int i = 0; i < passProducts.Count; i++)
+        {
+            Console.Write($"{passProducts[i].Name} ");
+        }
     }
+}
+
+enum ProductCategory : byte
+{
+    None,
+    Fruits,
+    Helthy
 }
