@@ -1,58 +1,44 @@
-﻿delegate bool ProductFilter(Product product);
+﻿/*
+👤 Создать класс Character.
 
-class Product
+🩸 Добавить в него приватное поле int _health = 100.
+
+📜 Объявить кастомный делегат HealthChangedHandler, который возвращает void и принимает один параметр int newHealth.
+
+🔔 Внутри класса Character объявить событие OnHealthChanged на основе созданного делегата.
+*/
+
+delegate void HealthChangedHandler(int health);
+
+class Character
 {
-    public string Name { get; private set; }
-    public decimal Price { get; private set; }
-    public ProductCategory Category { get; private set; }
+    private int _health;
+    public event HealthChangedHandler? HealthChanged;
 
-    public Product(string name, decimal price, ProductCategory category)
+    public Character(int health)
     {
-        Name = name;
-        Price = price;
-        Category = category;
+        _health = health;
     }
-}
 
-class DataEngine
-{
-    public static List<Product> Filter(List<Product> productsList, List<Product> passProductsList, ProductFilter productFilter)
+    public void TakeDamage(int damage)
     {
-        for (int i = 0; i < productsList.Count; i++)
-        {
-            if (productFilter.Invoke(productsList[i])) passProductsList.Add(productsList[i]);
-        }
-
-        return passProductsList;
+        _health -= damage;
+        HealthChanged?.Invoke(_health);
     }
 }
 
 class Program
 {
+    static void HealthDisplay(int health)
+    {
+        Console.WriteLine($"Character new health: {health}");
+    }
+
     static void Main()
     {
-        List<Product> products = new List<Product>();
-        List<Product> passProducts = new List<Product>();
-        var orange = new Product("Orange", 100, ProductCategory.Fruits);
-        var fish = new Product("Fish", 200, ProductCategory.Helthy);
+        var hero = new Character(100);
+        hero.HealthChanged += HealthDisplay;
 
-        products.Add(orange); products.Add(fish);
-            
-        int priceCheck = 100; // ВВОД ПОЛЬЗОВАТЕЛЯ БУДЕТ ДОПУСТИМ
-        ProductCategory productCategory = ProductCategory.Fruits; // ВВОД ПОЛЬЗОВАТЕЛЯ БУДЕТ ДОПУСТИМ
-
-        DataEngine.Filter(products, passProducts, product => product.Price > priceCheck && product.Category == productCategory);
-
-        for (int i = 0; i < passProducts.Count; i++)
-        {
-            Console.Write($"{passProducts[i].Name} ");
-        }
+        hero.TakeDamage(20);
     }
-}
-
-enum ProductCategory : byte
-{
-    None,
-    Fruits,
-    Helthy
 }
