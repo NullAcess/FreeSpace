@@ -1,27 +1,5 @@
-﻿delegate Closure Closure();
-
-class Program
+﻿Func<int, int> Multiply(int n, int m)
 {
-    static Closure OutFunc()
-    {
-        int x = 5;
-
-        Closure Inner()
-        {
-            x++;
-            Console.WriteLine(x);
-            return Inner;
-        }
-
-        return Inner;
-    }
-
-    static void Main()
-    {
-        Closure func = OutFunc();
-
-        func(); 
-        func(); 
-        func(); 
-    }
+    int Inner(int m) => n * m;
+    return Inner;
 }
