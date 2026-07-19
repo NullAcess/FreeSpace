@@ -1,10 +1,20 @@
-﻿delegate void MakeTransport<in TСar>(TСar car);
-delegate TTransport Order<out TTransport>(string name, int power);
-
-class Factory
+﻿class Factory
 {
-    public event MakeTransport<Car>? makeTransport;
-    public event Order<Transport>? order;
+    public event Action<Car>? makeTransport;
+    public event Func<string, int, Transport>? order;
+    public event Predicate<Transport>? isUltraVersion;
+
+    public bool VersionCheck(Transport transport)
+    {
+        if (transport.Power < 400)
+        {
+            Console.WriteLine("Is your car ultra: false"); 
+            return false;
+        }
+
+        Console.WriteLine("Is your car ultra: true");
+        return true;
+    }
 
     public Transport? ExecuteOrder(string name, int power)
     {
@@ -30,6 +40,7 @@ class Factory
     {
         vehicle.Power += 50;
         Console.WriteLine($"Ultra version activated");
+        isUltraVersion?.Invoke(vehicle);
     }
 }
 
@@ -62,6 +73,7 @@ class Program
         factory.order += factory.FactoryConsume;
         factory.makeTransport += factory.PrintStatus;
         factory.makeTransport += factory.PrintStageImprove;
+        factory.isUltraVersion += factory.VersionCheck;
 
         Transport? car = factory.ExecuteOrder("bmw", 400);
 
