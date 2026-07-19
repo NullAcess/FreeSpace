@@ -1,34 +1,34 @@
-﻿delegate void MakeTransport(Car car);
-delegate Transport Order();
-
-class Program
-{
-    static void Main()
-    {
-        Factory factory = new Factory();
-        factory.makeTransport += factory.CarStage;
-
-        Car car = factory.CarFactory("bmw", 400);
-        Console.WriteLine($"car test: | name: {car.Name}, car power: {car.Power}");
-    }
-}
+﻿delegate void MakeTransport<in TСar>(TСar car);
+delegate TTransport Order<out TTransport>(string name, int power);
 
 class Factory
 {
-    public event MakeTransport? makeTransport;
-    public event Order? order;
+    public event MakeTransport<Car>? makeTransport;
+    public event Order<Transport>? order;
 
-    public Car CarFactory(string name, int power)
+    public Transport? ExecuteOrder(string name, int power)
     {
-        Console.WriteLine($"Standart version power: {power}");
-        var fabricCar = new Car(name, power);
-        makeTransport?.Invoke(fabricCar);
-        return fabricCar;
+        return order?.Invoke(name, power);
     }
 
-    public void CarStage(Transport transport)
+    public Car FactoryConsume(string name, int power)
     {
-        transport.Power += 50;
+        // выбор пользователя тут допустим switch и выбрал сделать машину.
+        var car = new Car(name, power);
+        Console.WriteLine($"Version power: {power}");
+
+        makeTransport?.Invoke(car);
+        return car;
+    }
+
+    public void PrintStatus(Transport vehicle)
+    {
+        Console.WriteLine($"Making and stage your car");
+    }
+
+    public void PrintStageImprove(Transport vehicle)
+    {
+        vehicle.Power += 50;
         Console.WriteLine($"Ultra version activated");
     }
 }
@@ -51,5 +51,23 @@ class Car : Transport
     public Car(string name, int power) : base(name, power)
     {
         CID = Guid.NewGuid();
+    }
+}
+
+class Program
+{
+    static void Main()
+    {
+        Factory factory = new Factory();
+        factory.order += factory.FactoryConsume;
+        factory.makeTransport += factory.PrintStatus;
+        factory.makeTransport += factory.PrintStageImprove;
+
+        Transport? car = factory.ExecuteOrder("bmw", 400);
+
+        if(car is Car displayCar)
+        {
+            Console.WriteLine($"car test: | name: {displayCar.Name}, car power: {displayCar.Power}, car CID: {displayCar.CID}");
+        }
     }
 }
