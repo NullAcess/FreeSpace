@@ -4,22 +4,25 @@ interface IDriveable
 {
     const int MIN_SPEED = 0;
     const int MAX_SPEED = 100;
-    protected void Drive();
+    int Speed { get; }
+
+    Action<int>? driveHandler { get; set; }
+    Action? errorHandler { get; set; }
+    public void Drive()
+    {
+        if (Speed < MIN_SPEED || Speed > MAX_SPEED) { errorHandler?.Invoke(); }
+        else driveHandler?.Invoke(Speed);
+    }
 }
 
 class Car : IDriveable
 {
-    public event Action<int> driveHandler;
-    public event Action errorHandler;
+    public Action<int>? driveHandler { get; set; }
+    public Action? errorHandler { get; set; }
+
     public int Speed { get; private set; }
     public Car(int speed) => Speed = speed;
-
-    public void Drive()
-    {
-        if (Speed < IDriveable.MIN_SPEED || Speed > IDriveable.MAX_SPEED) { errorHandler.Invoke(); }
-        else driveHandler.Invoke(Speed);
-    }
- }
+}
 
 
 class Program
@@ -28,7 +31,7 @@ class Program
     static void PrintSpeed(int speed) => Console.WriteLine($"Your current speed: {speed}");
     static void Main()
     {
-        var vehicle = new Car(17);
+        IDriveable vehicle = new Car(55);
         vehicle.driveHandler += PrintSpeed;
         vehicle.errorHandler += PrintError;
 
