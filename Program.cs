@@ -1,59 +1,35 @@
-﻿interface IDataBaseConnect
+﻿interface IJumpable
 {
-    void DataBaseConnect();
-}
-
-interface IDataGet
-{
-    Guid GetData();
-}
-
-interface IDataProcess
-{
-    void DataProcessDisplay(Guid data);
-}
-
-class Data : IDataBaseConnect
-{
-    public Func<Guid>? getData;
-    public Guid GuidData { get; private protected set; }
-
-    public void DataBaseConnect()
+    protected const int JUMP_HEIGHT = 10;
+    protected void Jump(int x, int y)
     {
-        GuidData = getData?.Invoke() ?? Guid.Empty;
+        Console.WriteLine("Hello");
     }
+    public delegate void JumpHandler(string message);
 }
 
-class DataGet : IDataGet
+class Hero : IJumpable
 {
-    public event Action<Guid>? displayData;
-    public Guid GetData()
-    {
-        Guid guid = Guid.NewGuid();
-        displayData?.Invoke(guid);
-        return guid;
-    }
-}
+    public event IJumpable.JumpHandler? jumpable;
 
-class DataProcess : IDataProcess
-{
-    public void DataProcessDisplay(Guid data)
+    public void Jump(int x, int y)
     {
-        Console.WriteLine($"Your data: {data}");
+        Console.WriteLine($"Your new position: x: {x} y: {y + IJumpable.JUMP_HEIGHT}");
+        jumpable?.Invoke("You are jumping!");
     }
 }
 
 class Program
 {
+    static void Print(string message)
+    {
+        Console.WriteLine($"Jump message: {message}");
+    }
+
     static void Main()
     {
-        Data data = new Data();
-        DataGet dataGet = new DataGet();
-        DataProcess dataProcess = new DataProcess();
-
-        data.getData += dataGet.GetData;
-        dataGet.displayData += dataProcess.DataProcessDisplay;
-
-        data.DataBaseConnect();
+        var Hero = new Hero();
+        Hero.jumpable += Print;
+        Hero.Jump(15, 2);
     }
 }
