@@ -1,35 +1,37 @@
-﻿interface IJumpable
+﻿using System.Threading.Channels;
+
+interface IDriveable
 {
-    protected const int JUMP_HEIGHT = 10;
-    protected void Jump(int x, int y)
-    {
-        Console.WriteLine("Hello");
-    }
-    public delegate void JumpHandler(string message);
+    const int MIN_SPEED = 0;
+    const int MAX_SPEED = 100;
+    protected void Drive();
 }
 
-class Hero : IJumpable
+class Car : IDriveable
 {
-    public event IJumpable.JumpHandler? jumpable;
+    public event Action<int> driveHandler;
+    public event Action errorHandler;
+    public int Speed { get; private set; }
+    public Car(int speed) => Speed = speed;
 
-    public void Jump(int x, int y)
+    public void Drive()
     {
-        Console.WriteLine($"Your new position: x: {x} y: {y + IJumpable.JUMP_HEIGHT}");
-        jumpable?.Invoke("You are jumping!");
+        if (Speed < IDriveable.MIN_SPEED || Speed > IDriveable.MAX_SPEED) { errorHandler.Invoke(); }
+        else driveHandler.Invoke(Speed);
     }
-}
+ }
+
 
 class Program
 {
-    static void Print(string message)
-    {
-        Console.WriteLine($"Jump message: {message}");
-    }
-
+    static void PrintError() => Console.WriteLine("Wrong value to set speed");
+    static void PrintSpeed(int speed) => Console.WriteLine($"Your current speed: {speed}");
     static void Main()
     {
-        var Hero = new Hero();
-        Hero.jumpable += Print;
-        Hero.Jump(15, 2);
+        var vehicle = new Car(17);
+        vehicle.driveHandler += PrintSpeed;
+        vehicle.errorHandler += PrintError;
+
+        vehicle.Drive();
     }
 }
