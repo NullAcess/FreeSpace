@@ -1,40 +1,57 @@
-﻿using System.Threading.Channels;
+﻿/*
+    ### 7. Определение и применение интерфейсов
 
-interface IDriveable
+* **Контекст:** Система сохранения файлов в разные хранилища.
+* **Задание:**
+1. Объявите интерфейс `IStorageSaver` с методом `void Save(string fileName, byte[] data)`.
+2. Реализуйте его в классах `LocalStorage` (пишет в консоль *"Сохранение на диск"*) и `CloudStorage` (пишет в консоль *"Загрузка в облако"*).
+3. Создайте класс `DocumentManager`, который принимает `IStorageSaver` через конструктор и имеет метод `SaveDocument(...)`. Продемонстрируйте подмену хранилища.
+
+*/
+
+interface IStorageSaver
 {
-    const int MIN_SPEED = 0;
-    const int MAX_SPEED = 100;
-    int Speed { get; }
+    void Save(string fileName, byte[] data);
+}
 
-    Action<int>? driveHandler { get; set; }
-    Action? errorHandler { get; set; }
-    public void Drive()
+class LocalStorage : IStorageSaver
+{
+    public void Save(string fileName, byte[] data)
     {
-        if (Speed < MIN_SPEED || Speed > MAX_SPEED) { errorHandler?.Invoke(); }
-        else driveHandler?.Invoke(Speed);
+        Console.WriteLine($"Local save '{fileName}', size: {data.Length}");
+    }
+}
+class CloudStorage : IStorageSaver
+{
+    public void Save(string fileName, byte[] data)
+    {
+        Console.WriteLine($"Cloude save '{fileName}', size: {data.Length}");
     }
 }
 
-class Car : IDriveable
+class DocumentManager
 {
-    public Action<int>? driveHandler { get; set; }
-    public Action? errorHandler { get; set; }
+    private readonly IStorageSaver? storageSaver;
+    public DocumentManager(IStorageSaver storageSaver)
+    {
+        this.storageSaver = storageSaver;
+    }
 
-    public int Speed { get; private set; }
-    public Car(int speed) => Speed = speed;
+    public void SaveDocument(string fileName, byte[] data)
+    {
+        storageSaver?.Save(fileName, data);
+    }
 }
-
 
 class Program
 {
-    static void PrintError() => Console.WriteLine("Wrong value to set speed");
-    static void PrintSpeed(int speed) => Console.WriteLine($"Your current speed: {speed}");
     static void Main()
     {
-        IDriveable vehicle = new Car(55);
-        vehicle.driveHandler += PrintSpeed;
-        vehicle.errorHandler += PrintError;
+        byte[] fileData = new byte[] { 4, 3, 5, 55, 3 };
 
-        vehicle.Drive();
+        var localStorage = new LocalStorage();
+        var cloudStorage = new CloudStorage();
+        var documentManager = new DocumentManager(localStorage);
+        documentManager.SaveDocument("L_Data", fileData);
     }
 }
