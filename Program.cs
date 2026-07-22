@@ -1,42 +1,55 @@
 ﻿/*
-    ### 7. Определение и применение интерфейсов
+ 
+### 9. Реализация интерфейсов в базовых и производных классах
 
-* **Контекст:** Конфликт имен в универсальном контроллере устройства.
+* **Контекст:** Иерархия логирования.
 * **Задание:**
-1. Создайте интерфейсы `IBluetoothDevice` (метод `void Reset()`) и `ISystemControl` (метод `void Reset()`).
-2. Создайте класс `SmartSpeaker`, реализующий оба интерфейса через **явную реализацию** (`void IBluetoothDevice.Reset()` и `void ISystemControl.Reset()`).
-3. В `Main` создайте объект `SmartSpeaker` и вызовите метод `Reset()` отдельно для Bluetooth и отдельно для системного сброса с помощью приведения типов.
+1. Создайте интерфейс `ILogger` с методом `void Log(string message)`.
+2. Создайте базовый класс `BaseLogger : ILogger`, реализующий метод `Log` как **`virtual`**.
+3. Создайте производный класс `FileLogger : BaseLogger` и переопределите метод `Log` через **`override`**.
+4. Сохраните объект `FileLogger` в переменную типа `ILogger` и убедитесь, что при вызове `logger.Log()` выполняется переопределенная логика из `FileLogger`.
 
 */
 
-interface IBluetoothDevice
+interface ILogger
 {
-    void Reset();
+    void Log(string message);
 }
 
-interface ISystemControl
+class BaseLogger : ILogger
 {
-    void Reset();
-}
+    public virtual void Log(string message)
+    {
+        Console.WriteLine(message);
+    }
 
-class SmartSpeaker : IBluetoothDevice, ISystemControl
+    public virtual void Print()
+    {
+        Console.WriteLine("Base logger");
+    }
+}
+class FileLogger : BaseLogger
 {
-    void IBluetoothDevice.Reset() { Console.WriteLine("Bluetooth Reset"); }
-    void ISystemControl.Reset() { Console.WriteLine("System reset"); }
+    public override void Log(string message)
+    {
+        Console.WriteLine(message);
+    }
+    public override void Print()
+    {
+        Console.WriteLine("File logger");
+    }
 }
 
 class Program
 {
     static void Main()
     {
-        SmartSpeaker smartSpeaker = new SmartSpeaker();
-        IBluetoothDevice smartSpeaker2 = new SmartSpeaker();
-        ISystemControl smartSpeaker3 = new SmartSpeaker();
-
-        smartSpeaker2.Reset();
-        smartSpeaker3.Reset();
-        Console.WriteLine();
-        ((IBluetoothDevice)smartSpeaker).Reset();
-        ((ISystemControl)smartSpeaker).Reset();
+        ILogger logger = new FileLogger();
+        logger.Log("empty message");
+        
+        if(logger is FileLogger fileLogger)
+        {
+            fileLogger.Print();
+        }
     }
 }
