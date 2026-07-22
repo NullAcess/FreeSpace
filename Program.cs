@@ -1,48 +1,28 @@
-﻿public interface IMyCloneable<T>
+﻿class Company : IComparable<Company>
 {
-    T Clone();
+    public decimal Money { get; private set; }
+
+    public Company(decimal money)
+    {
+        Money = money;
+    }
+
+    public int CompareTo(Company company)
+    {
+        if (company == null) return 1;
+        return this.Money.CompareTo(company.Money) ;
+    }
 }
 
-interface ILogger
+class CompanyByMoneyComparer : IComparer<Company>
 {
-    void Log(string message);
-}
-
-class BaseLogger : ILogger, IMyCloneable<BaseLogger>
-{
-    public string name = "Name: BASE logger";
-
-    public BaseLogger(string name = "B")
+    public int Compare(Company firstCompany, Company secondCompany)
     {
-        this.name = name;
-    }
-
-    public virtual void Log(string message)
-    {
-        Console.WriteLine(message);
-    }
-
-    public virtual void Print()
-    {
-        Console.WriteLine("Base logger");
-    }
-
-    public BaseLogger Clone()
-    {
-        return (BaseLogger)MemberwiseClone();
-    }
-}
-class FileLogger : BaseLogger
-{
-    public FileLogger(string name = "S") : base(name) { }
-
-    public override void Log(string message)
-    {
-        Console.WriteLine(message);
-    }
-    public override void Print()
-    {
-        Console.WriteLine("File logger");
+        if (firstCompany == null && secondCompany == null) return 0;
+        if (firstCompany == null) return -1;
+        if (secondCompany == null) return 1;
+        
+        return secondCompany.Money.CompareTo(firstCompany.Money);
     }
 }
 
@@ -50,23 +30,40 @@ class Program
 {
     static void Main()
     {
-        ILogger logger = new BaseLogger();
-        logger.Log("empty message");
+        int[] array = { 5, 3, 6, 1, 7 };
+        Array.Sort(array);
 
-        BaseLogger fileLoggerAddition;
+        var compareObject = new CompanyByMoneyComparer();
 
-        if (logger is FileLogger fileLogger)
-        {
-            fileLogger.Print();
-            fileLoggerAddition = fileLogger.Clone();
-            Console.WriteLine(fileLoggerAddition.name);
-        }
-        else if (logger is BaseLogger baseLogger)
-        {
-            baseLogger.Print();
-            fileLoggerAddition = baseLogger.Clone();
-            Console.WriteLine(fileLoggerAddition.name);
-        }
+        var microsoft = new Company(12345);
+        var google = new Company(123456);
+        var amazon = new Company(123456);
+        var yandex = new Company(1234);
+        yandex = null;
 
+        int result = microsoft.CompareTo(google);
+        int resultInverse = google.CompareTo(microsoft);
+        int resultEqual = google.CompareTo(amazon);
+        int nullResult = microsoft.CompareTo(yandex);
+        Console.WriteLine(result);
+        Console.WriteLine(resultInverse);
+        Console.WriteLine(resultEqual);
+        Console.WriteLine(nullResult);
+
+        int newResult = compareObject.Compare(microsoft, google);
+        Console.WriteLine($"\n{newResult}");
+
+        var companies = new List<Company>
+            {
+                new Company(12),
+                new Company(123),
+                new Company(1234)
+            };
+
+        companies.Sort();
+        foreach (var c in companies) Console.WriteLine(c.Money);
+
+        companies.Sort(new CompanyByMoneyComparer());
+        foreach (var c in companies) Console.WriteLine(c.Money);
     }
 }
