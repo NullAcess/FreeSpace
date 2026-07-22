@@ -1,26 +1,18 @@
-﻿/*
- 
-### 9. Реализация интерфейсов в базовых и производных классах
-
-* **Контекст:** Иерархия логирования.
-* **Задание:**
-1. Создайте интерфейс `ILogger` с методом `void Log(string message)`.
-2. Создайте базовый класс `BaseLogger : ILogger`, реализующий метод `Log` как **`virtual`**.
-3. Создайте производный класс `FileLogger : BaseLogger` и переопределите метод `Log` через **`override`**.
-4. Сохраните объект `FileLogger` в переменную типа `ILogger` и убедитесь, что при вызове `logger.Log()` выполняется переопределенная логика из `FileLogger`.
-
-*/
+﻿public interface IMyCloneable<T>
+{
+    T Clone();
+}
 
 interface ILogger
 {
     void Log(string message);
 }
 
-class BaseLogger : ILogger, ICloneable
+class BaseLogger : ILogger, IMyCloneable<BaseLogger>
 {
     public string name = "Name: BASE logger";
 
-    public BaseLogger(string name)
+    public BaseLogger(string name = "B")
     {
         this.name = name;
     }
@@ -35,14 +27,14 @@ class BaseLogger : ILogger, ICloneable
         Console.WriteLine("Base logger");
     }
 
-    public object Clone()
+    public BaseLogger Clone()
     {
-        return MemberwiseClone();
+        return (BaseLogger)MemberwiseClone();
     }
 }
 class FileLogger : BaseLogger
 {
-    public FileLogger(string name) : base(name) { }
+    public FileLogger(string name = "S") : base(name) { }
 
     public override void Log(string message)
     {
@@ -58,15 +50,23 @@ class Program
 {
     static void Main()
     {
-        ILogger logger = new FileLogger("Name_Logger_File");
+        ILogger logger = new BaseLogger();
         logger.Log("empty message");
+
+        BaseLogger fileLoggerAddition;
 
         if (logger is FileLogger fileLogger)
         {
             fileLogger.Print();
-
-            FileLogger fileLoggerAddition = (FileLogger)fileLogger.Clone();
+            fileLoggerAddition = fileLogger.Clone();
             Console.WriteLine(fileLoggerAddition.name);
         }
+        else if (logger is BaseLogger baseLogger)
+        {
+            baseLogger.Print();
+            fileLoggerAddition = baseLogger.Clone();
+            Console.WriteLine(fileLoggerAddition.name);
+        }
+
     }
 }
