@@ -1,57 +1,42 @@
 ﻿/*
     ### 7. Определение и применение интерфейсов
 
-* **Контекст:** Система сохранения файлов в разные хранилища.
+* **Контекст:** Конфликт имен в универсальном контроллере устройства.
 * **Задание:**
-1. Объявите интерфейс `IStorageSaver` с методом `void Save(string fileName, byte[] data)`.
-2. Реализуйте его в классах `LocalStorage` (пишет в консоль *"Сохранение на диск"*) и `CloudStorage` (пишет в консоль *"Загрузка в облако"*).
-3. Создайте класс `DocumentManager`, который принимает `IStorageSaver` через конструктор и имеет метод `SaveDocument(...)`. Продемонстрируйте подмену хранилища.
+1. Создайте интерфейсы `IBluetoothDevice` (метод `void Reset()`) и `ISystemControl` (метод `void Reset()`).
+2. Создайте класс `SmartSpeaker`, реализующий оба интерфейса через **явную реализацию** (`void IBluetoothDevice.Reset()` и `void ISystemControl.Reset()`).
+3. В `Main` создайте объект `SmartSpeaker` и вызовите метод `Reset()` отдельно для Bluetooth и отдельно для системного сброса с помощью приведения типов.
 
 */
 
-interface IStorageSaver
+interface IBluetoothDevice
 {
-    void Save(string fileName, byte[] data);
+    void Reset();
 }
 
-class LocalStorage : IStorageSaver
+interface ISystemControl
 {
-    public void Save(string fileName, byte[] data)
-    {
-        Console.WriteLine($"Local save '{fileName}', size: {data.Length}");
-    }
-}
-class CloudStorage : IStorageSaver
-{
-    public void Save(string fileName, byte[] data)
-    {
-        Console.WriteLine($"Cloude save '{fileName}', size: {data.Length}");
-    }
+    void Reset();
 }
 
-class DocumentManager
+class SmartSpeaker : IBluetoothDevice, ISystemControl
 {
-    private readonly IStorageSaver? storageSaver;
-    public DocumentManager(IStorageSaver storageSaver)
-    {
-        this.storageSaver = storageSaver;
-    }
-
-    public void SaveDocument(string fileName, byte[] data)
-    {
-        storageSaver?.Save(fileName, data);
-    }
+    void IBluetoothDevice.Reset() { Console.WriteLine("Bluetooth Reset"); }
+    void ISystemControl.Reset() { Console.WriteLine("System reset"); }
 }
 
 class Program
 {
     static void Main()
     {
-        byte[] fileData = new byte[] { 4, 3, 5, 55, 3 };
+        SmartSpeaker smartSpeaker = new SmartSpeaker();
+        IBluetoothDevice smartSpeaker2 = new SmartSpeaker();
+        ISystemControl smartSpeaker3 = new SmartSpeaker();
 
-        var localStorage = new LocalStorage();
-        var cloudStorage = new CloudStorage();
-        var documentManager = new DocumentManager(localStorage);
-        documentManager.SaveDocument("L_Data", fileData);
+        smartSpeaker2.Reset();
+        smartSpeaker3.Reset();
+        Console.WriteLine();
+        ((IBluetoothDevice)smartSpeaker).Reset();
+        ((ISystemControl)smartSpeaker).Reset();
     }
 }
