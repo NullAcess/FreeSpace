@@ -1,28 +1,32 @@
-﻿class Company : IComparable<Company>
+﻿interface IMyCloneable<T>
 {
-    public decimal Money { get; private set; }
+    T Clone();
+}
 
-    public Company(decimal money)
-    {
-        Money = money;
-    }
+class OrderItem
+{
+    public string Title { get; private set; }
+    public decimal Price { get; private set; }
 
-    public int CompareTo(Company company)
+    public OrderItem(string title, decimal price)
     {
-        if (company == null) return 1;
-        return this.Money.CompareTo(company.Money) ;
+        Title = title;
+        Price = price;
     }
 }
 
-class CompanyByMoneyComparer : IComparer<Company>
+class Order : IMyCloneable<Order>
 {
-    public int Compare(Company firstCompany, Company secondCompany)
+    public int Id { get; set; }
+    public List<OrderItem> Items { get; private set; } = new List<OrderItem>();
+
+    public Order Clone()
     {
-        if (firstCompany == null && secondCompany == null) return 0;
-        if (firstCompany == null) return -1;
-        if (secondCompany == null) return 1;
         
-        return secondCompany.Money.CompareTo(firstCompany.Money);
+        Order order = (Order)MemberwiseClone();
+        order.Items = Items.Select(item => new OrderItem(item.Title, item.Price)).ToList();
+
+        return order;
     }
 }
 
@@ -30,40 +34,30 @@ class Program
 {
     static void Main()
     {
-        int[] array = { 5, 3, 6, 1, 7 };
-        Array.Sort(array);
+        var order1 = new Order();
+        order1.Id = 5;
+        Console.WriteLine(order1.Id);
+        var mouse = new OrderItem("mouse", 20);
+        var laptop = new OrderItem("laptop", 500);
 
-        var compareObject = new CompanyByMoneyComparer();
+        order1.Items.Add(mouse);
+        order1.Items.Add(laptop);
 
-        var microsoft = new Company(12345);
-        var google = new Company(123456);
-        var amazon = new Company(123456);
-        var yandex = new Company(1234);
-        yandex = null;
+        var order2 = new Order();
+        order2 = order1?.Clone();
+        order2?.Items.Add(laptop);
+        order2?.Id = 6;
+        Console.WriteLine(order2?.Id);
+        Console.WriteLine(order1?.Id);
 
-        int result = microsoft.CompareTo(google);
-        int resultInverse = google.CompareTo(microsoft);
-        int resultEqual = google.CompareTo(amazon);
-        int nullResult = microsoft.CompareTo(yandex);
-        Console.WriteLine(result);
-        Console.WriteLine(resultInverse);
-        Console.WriteLine(resultEqual);
-        Console.WriteLine(nullResult);
-
-        int newResult = compareObject.Compare(microsoft, google);
-        Console.WriteLine($"\n{newResult}");
-
-        var companies = new List<Company>
-            {
-                new Company(12),
-                new Company(123),
-                new Company(1234)
-            };
-
-        companies.Sort();
-        foreach (var c in companies) Console.WriteLine(c.Money);
-
-        companies.Sort(new CompanyByMoneyComparer());
-        foreach (var c in companies) Console.WriteLine(c.Money);
+        for (int i = 0; i < order2?.Items?.Count; i++)
+        {
+            Console.Write($"{order2.Items[i].Title} ");
+        }
+        Console.WriteLine();
+        for (int i = 0; i < order1?.Items?.Count; i++)
+        {
+            Console.Write($"{order1.Items[i].Title} ");
+        }
     }
 }
