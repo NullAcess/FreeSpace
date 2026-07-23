@@ -1,27 +1,35 @@
-﻿class Player : IComparable<Player>
+﻿interface ILogWriter<in T>
 {
-    public string Nickname { get; private set; }
-    public int Score { get; private set; }
-    public int Level { get; private set; }
+    void WriteLog(T log);
+}
 
-    public Player(string nickname, int score, int level)
+interface ILogReader<out T>
+{
+    T ReadLog();
+}
+
+public class LogMessage : ILogWriter<LogMessage>
+{
+    public string Text { get; private set; }
+    public LogMessage(string text) => Text = text;
+
+    public void WriteLog(LogMessage logMessage)
     {
-        Nickname = nickname;
-        Score = score;
-        Level = level;
+        logMessage.Text = Text;
+    }
+}
+
+public class CriticalErrorLog : LogMessage, ILogReader<CriticalErrorLog>
+{
+    public string StackTrace { get; private set; }
+    public CriticalErrorLog(string text, string stackTrace) : base(text)
+    {
+        StackTrace = stackTrace;
     }
 
-    public int CompareTo(Player other)
+    public CriticalErrorLog ReadLog()
     {
-        if (other == null) return 1;
-        
-        int scoreResult = other.Score.CompareTo(Score);
-        if(scoreResult != 0)
-        {
-            return scoreResult;
-        }
-
-        return Nickname.CompareTo(other.Nickname);
+        return new CriticalErrorLog(Text, StackTrace);
     }
 }
 
@@ -29,20 +37,14 @@ class Program
 {
     static void Main()
     {
-        var leaderboard = new List<Player>
-            {
-                new Player("Shadow", 2500, 50),
-                new Player("Alex", 3100, 70),
-                new Player("CyberNinja", 2500, 45),
-                new Player("Alpha", 3100, 80),
-                new Player("Beginner", 1000, 10)
-            };
+        LogMessage logMessage = new LogMessage("Error 400");
+        CriticalErrorLog criticalErrorLog = new CriticalErrorLog("Unknown error", "Stack #1");
 
-        leaderboard.Sort();
+        ILogReader<CriticalErrorLog> logReader = criticalErrorLog;
+        CriticalErrorLog criticalErrorLogTemp = logReader.ReadLog();
+        ILogWriter<LogMessage> logWriter = logMessage; 
+        logWriter.WriteLog(criticalErrorLogNew);
 
-        foreach(Player user in leaderboard)
-        {
-            Console.WriteLine($"{user.Nickname} | {user.Score} | {user.Level}");
-        }
+        Console.WriteLine($"Log: {criticalErrorLogNew.Text} | {criticalErrorLogNew.StackTrace}");
     }
 }
