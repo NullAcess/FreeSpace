@@ -1,50 +1,18 @@
-﻿interface ILogWriter<in T>
+﻿class Program
 {
-    void WriteLog(T log);
-}
-
-interface ILogReader<out T>
-{
-    T ReadLog();
-}
-
-public class LogMessage : ILogWriter<LogMessage>
-{
-    public string Text { get; private set; }
-    public LogMessage(string text) => Text = text;
-
-    public void WriteLog(LogMessage logMessage)
+    async static Task Main(string[] args)
     {
-        logMessage.Text = Text;
-    }
-}
+        var task = PrintAsync();
+        Console.WriteLine();
+        Console.WriteLine("Некоторые действия в методе Main");
+        await task;
 
-public class CriticalErrorLog : LogMessage, ILogReader<CriticalErrorLog>
-{
-    public string StackTrace { get; private set; }
-    public CriticalErrorLog(string text, string stackTrace) : base(text)
-    {
-        StackTrace = stackTrace;
-    }
-
-    public CriticalErrorLog ReadLog()
-    {
-        return new CriticalErrorLog(Text, StackTrace);
-    }
-}
-
-class Program
-{
-    static void Main()
-    {
-        LogMessage logMessage = new LogMessage("Error 400");
-        CriticalErrorLog criticalErrorLog = new CriticalErrorLog("Unknown error", "Stack #1");
-
-        ILogReader<CriticalErrorLog> logReader = criticalErrorLog;
-        CriticalErrorLog criticalErrorLogTemp = logReader.ReadLog();
-        ILogWriter<LogMessage> logWriter = logMessage; 
-        logWriter.WriteLog(criticalErrorLogNew);
-
-        Console.WriteLine($"Log: {criticalErrorLogNew.Text} | {criticalErrorLogNew.StackTrace}");
+        async Task PrintAsync()
+        {
+            Console.WriteLine("Начало метода PrintAsync");
+            await Task.Delay(3000);
+            Console.WriteLine("Hello METANIT.COM");
+            Console.WriteLine("Конец метода PrintAsync");
+        }
     }
 }
