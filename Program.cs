@@ -1,18 +1,29 @@
 ﻿class Program
 {
-    async static Task Main(string[] args)
+    static void Main()
     {
-        var task = PrintAsync();
-        Console.WriteLine();
-        Console.WriteLine("Некоторые действия в методе Main");
-        await task;
+        var obj = new object();
+        int x = 0;
 
-        async Task PrintAsync()
+        for (int i = 0; i < 5; i++)
         {
-            Console.WriteLine("Начало метода PrintAsync");
-            await Task.Delay(3000);
-            Console.WriteLine("Hello METANIT.COM");
-            Console.WriteLine("Конец метода PrintAsync");
+            Thread myThread = new(Print);
+            myThread.Name = $"Thread {i}";
+            myThread.Start();
+        }
+
+        void Print()
+        {
+            lock (obj)
+            {
+                x = 1;
+                for (int i = 0; i < 5; i++)
+                {
+                    Console.WriteLine($"{Thread.CurrentThread.Name}: {x}");
+                    x++;
+                    Thread.Sleep(100);
+                }
+            }
         }
     }
 }
