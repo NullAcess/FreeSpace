@@ -1,10 +1,13 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 class Player
 {
     public string UserName { get; } = "Unknown";
     public int Id { get; }
 
+    [JsonConstructor]
     public Player(string userName, int id)
     {
         UserName = userName;
@@ -15,9 +18,12 @@ class Player
 class Program
 {
     private const string FilePath = @"C:\Users\ll1on\Desktop";
+
     private static readonly string CombinePath = Path.Combine(FilePath, "user.json");
     private static readonly JsonSerializerOptions jsonSerializerOptions = new() { WriteIndented = true };
+
     private static List<Player> _players = new();
+    private static FileInfo fileInfo = new(CombinePath);
 
     static bool CompareNodes(Player player, Player nodePlayer)
     {
@@ -32,17 +38,17 @@ class Program
 
     static List<Player> LoadJsonData()
     {
-        using (FileStream fs = new FileStream(CombinePath, FileMode.Open))
+        using (FileStream fs = new FileStream(CombinePath, FileMode.Open, FileAccess.Read))
         {
-                List<Player> players = JsonSerializer.Deserialize<List<Player>>(fs, jsonSerializerOptions);
-                return players;  
+            List<Player> players = JsonSerializer.Deserialize<List<Player>>(fs, jsonSerializerOptions);
+            return players;
         }
     }
 
     static async Task<bool> CheckSave(Player player)
     {
         {
-            using (FileStream fs = new FileStream(CombinePath, FileMode.Open))
+            using (FileStream fs = new FileStream(CombinePath, FileMode.Open, FileAccess.Read))
             {
                 List<Player> nodePlayer = await JsonSerializer.DeserializeAsync<List<Player>>(fs, jsonSerializerOptions);
 
@@ -65,12 +71,13 @@ class Program
     {
         {
             if (!await CheckSave(player))
-            {
                 return false;
-            }
+
             else
             {
+                _players = LoadJsonData();
                 _players.Add(player);
+
                 using (FileStream fs = new FileStream(CombinePath, FileMode.Create, FileAccess.Write))
                 {
                     await JsonSerializer.SerializeAsync(fs, _players, jsonSerializerOptions);
@@ -82,12 +89,12 @@ class Program
 
     static async Task InitializeDefaultFile()
     {
-        if (!File.Exists(CombinePath))
+        if (!File.Exists(CombinePath) || fileInfo.Length <= 0)
         {
             var defaultPlayer = new Player("Unknown", -1);
 
             _players.Add(defaultPlayer);
-            using (FileStream fs = new FileStream(CombinePath, FileMode.Create, FileAccess.ReadWrite))
+            using (FileStream fs = new FileStream(CombinePath, FileMode.Create, FileAccess.Write))
             {
                 await JsonSerializer.SerializeAsync(fs, _players, jsonSerializerOptions);
                 return;
@@ -96,7 +103,7 @@ class Program
     }
 
     static async Task Main()
-    {        
+    {
         await InitializeDefaultFile();
         _players = LoadJsonData();
 
