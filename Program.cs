@@ -21,19 +21,22 @@ class Program
 
     static bool CompareNodes(Player player, Player nodePlayer)
     {
-        if (player.UserName == nodePlayer.UserName)
+        if (player.UserName == nodePlayer.UserName && player.Id == nodePlayer.Id)
         {
-            UserNotification("Name is already exist");
-            return false;
-        }
-
-        if (player.Id == nodePlayer.Id)
-        {
-            UserNotification("Name is already exist");
+            UserNotification("Data is already exist");
             return false;
         }
 
         return true;
+    }
+
+    static List<Player> LoadJsonData()
+    {
+        using (FileStream fs = new FileStream(CombinePath, FileMode.Open))
+        {
+                List<Player> players = JsonSerializer.Deserialize<List<Player>>(fs, jsonSerializerOptions);
+                return players;  
+        }
     }
 
     static async Task<bool> CheckSave(Player player)
@@ -43,7 +46,7 @@ class Program
             {
                 List<Player> nodePlayer = await JsonSerializer.DeserializeAsync<List<Player>>(fs, jsonSerializerOptions);
 
-                for (int i = 0; i < _players.Count; i++)
+                for (int i = 0; i < nodePlayer.Count; i++)
                 {
                     if (!CompareNodes(player, nodePlayer[i]))
                     {
@@ -79,7 +82,7 @@ class Program
 
     static async Task InitializeDefaultFile()
     {
-        while (true)
+        if (!File.Exists(CombinePath))
         {
             var defaultPlayer = new Player("Unknown", -1);
 
@@ -93,11 +96,12 @@ class Program
     }
 
     static async Task Main()
-    {
+    {        
         await InitializeDefaultFile();
+        _players = LoadJsonData();
 
-        string userName = "Unknown";
-        int id = -1;
+        string userName;
+        int id;
 
         while (true)
         {
@@ -128,7 +132,7 @@ class Program
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("===============================================================");
 
-        for(int i =0; i < _players.Count; i++)
+        for (int i = 0; i < _players.Count; i++)
         {
             Console.WriteLine($"Name: {_players[i].UserName} | Id: {_players[i].Id}");
         }
