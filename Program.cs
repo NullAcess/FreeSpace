@@ -2,8 +2,8 @@
 
 class Program
 {
-    private static event Func<int, int, int> sum = (x, y) => { return x + y; };
-    private static event Func<int, int, int> multiply = (x, y) => { return x * y; };
+    private static Func<int, int, int> sum = (x, y) => { return x + y; };
+    private static Func<int, int, int> multiply = (x, y) => { return x * y; };
 
     static void Start(Func<int> operation, [CallerMemberName] string callerName = "") // Strategy pattern
     {
