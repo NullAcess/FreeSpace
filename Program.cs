@@ -1,25 +1,53 @@
-﻿using System.Runtime.CompilerServices;
+﻿interface ICommand
+{
+    public void Execute();
+}
+
+class Person
+{
+    public void Print()
+    {
+        Console.WriteLine("Hello world");
+    }
+}
+
+class PrintCommand : ICommand
+{
+    private readonly Person _person;
+    public PrintCommand(Person person)
+    {
+        _person = person;
+    }
+
+    public void Execute()
+    {
+        _person.Print();
+    }
+}
+
+class View
+{
+    ICommand _command;
+
+    public View(ICommand command)
+    {
+        _command = command;
+    }
+
+    public void Start()
+    {
+        _command.Execute();
+    }
+}
 
 class Program
 {
-    private static Func<int, int, int> sum = (x, y) => { return x + y; };
-    private static Func<int, int, int> multiply = (x, y) => { return x * y; };
-
-    static void Start(Func<int> operation, [CallerMemberName] string callerName = "") // Strategy pattern
-    {
-        Console.WriteLine($"CALLER [{callerName}]");
-        Console.WriteLine($"result: {operation?.Invoke()}");
-    }
-
     static void Main()
     {
-        while (true)
-        {
-            switch (Console.ReadKey(true).Key)
-            {
-                case ConsoleKey.D1: Start(() => { return sum(5, 4); }); break;
-                case ConsoleKey.D2: Start(() => { return multiply(5, 4); }); break;
-            }
-        }
+        Person person = new();
+        ICommand printCommand = new PrintCommand(person);
+        View view = new(printCommand);
+
+        view.Start();
     }
 }
