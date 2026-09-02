@@ -29,11 +29,6 @@ class View
 {
     ICommand _command;
 
-    public View(ICommand command)
-    {
-        _command = command;
-    }
-
     public void Start()
     {
         _command.Execute();
@@ -46,7 +41,7 @@ class Program
     {
         Person person = new();
         ICommand printCommand = new PrintCommand(person);
-        View view = new(printCommand);
+        View view = new();
 
         view.Start();
     }
